@@ -1,159 +1,120 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Page elements
-    const mainContent = document.getElementById('main-content');
+
+    // --- DOM Elements ---
+    const mainPage = document.getElementById('main-page');
     const resultPage = document.getElementById('result-page');
-
-    // Form and button elements
-    const userInfoForm = document.getElementById('userInfoForm');
-    const showResultBtn = document.getElementById('showResultBtn');
-
-    // Drag-and-drop file upload elements
-    const dropZone = document.getElementById('drop-zone');
-    const photoInput = document.getElementById('photo');
-    const imagePreview = document.getElementById('image-preview');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const retryBtn = document.getElementById('retry-btn');
     
-    let uploadedFile = null;
+    const photoInput = document.getElementById('photo');
+    const photoPreview = document.querySelector('.photo-preview');
+    const photoUploader = document.querySelector('.photo-uploader');
 
-    // --- File Upload Logic ---
+    const userProfileEl = document.getElementById('user-profile');
+    const matchListEl = document.getElementById('match-list');
 
-    // 1. Drag and Drop events
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('drag-over');
-    });
+    const loadingContainer = document.querySelector('.loading-container');
+    const resultContent = document.querySelector('.result-content');
 
-    dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('drag-over');
-    });
+    // --- Event Listeners ---
 
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('drag-over');
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            photoInput.files = files;
-            handleFile(files[0]);
-        }
-    });
-
-    // 2. Click to upload event
-    dropZone.addEventListener('click', () => {
-        photoInput.click();
-    });
-
-    photoInput.addEventListener('change', () => {
-        if (photoInput.files.length > 0) {
-            handleFile(photoInput.files[0]);
-        }
-    });
-
-    /**
-     * Handles the file once it's selected or dropped.
-     * @param {File} file The uploaded file.
-     */
-    function handleFile(file) {
-        if (file && file.type.startsWith('image/')) {
-            uploadedFile = file;
+    // 1. Photo Upload & Preview
+    photoUploader.addEventListener('click', () => photoInput.click());
+    photoInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                imagePreview.innerHTML = `<img src="${e.target.result}" alt="Uploaded face photo">`;
+                photoPreview.style.backgroundImage = `url(${e.target.result})`;
+                // Clear the default text
+                photoUploader.querySelector('.photo-label').style.display = 'none'; 
             };
             reader.readAsDataURL(file);
-        } else {
-            uploadedFile = null;
-            imagePreview.innerHTML = '';
-            alert('이미지 파일만 업로드할 수 있습니다.');
         }
-    }
+    });
 
-    // --- Page Navigation and Result Logic ---
-
-    showResultBtn.addEventListener('click', () => {
-        // Basic validation
-        const name = document.getElementById('name').value;
-        const birthdate = document.getElementById('birthdate').value;
-        const gender = document.querySelector('input[name="gender"]:checked');
-        
-        if (!name || !birthdate || !uploadedFile || !gender) {
-            alert('이름, 성별, 생년월일을 입력하고 얼굴 사진을 업로드해주세요.');
-            return;
-        }
-
-        // Switch pages
-        mainContent.classList.add('hidden');
+    // 2. Analyze Button Click
+    analyzeBtn.addEventListener('click', () => {
+        // --- Start transition ---
+        mainPage.classList.add('fade-out');
         resultPage.classList.remove('hidden');
 
-        // Start the analysis simulation
-        simulateAnalysis();
-    });
-    
-    // Prevent default form submission
-    userInfoForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-    });
-
-
-    /**
-     * Simulates a backend analysis process.
-     */
-    function simulateAnalysis() {
-        const loader = document.getElementById('loader');
-        const resultHeader = resultPage.querySelector('h2');
-        const resultContent = document.getElementById('resultContent');
-        
-        // Show loader and hide results
-        loader.classList.remove('hidden');
-        resultContent.classList.add('hidden');
-        resultHeader.textContent = '매칭 결과 분석중...';
-
         setTimeout(() => {
-            // Hide loader and show results
-            loader.classList.add('hidden');
-            resultContent.classList.remove('hidden');
-            resultHeader.textContent = '매칭 결과';
-            
-            displayResults();
-        }, 3000); // 3-second delay
-    }
+            mainPage.classList.add('hidden');
+            resultPage.classList.add('fade-in');
 
-    /**
-     * Generates and displays mock matching results.
-     */
+            // --- Simulate AI Analysis ---
+            setTimeout(() => {
+                loadingContainer.classList.add('hidden');
+                resultContent.classList.remove('hidden');
+                displayResults();
+            }, 2500); // Simulate 2.5 seconds of analysis
+
+        }, 500); // Match CSS transition duration
+    });
+
+    // 3. Retry Button Click
+    retryBtn.addEventListener('click', () => {
+        // Reset UI to initial state
+        resultPage.classList.remove('fade-in');
+        resultPage.classList.add('hidden');
+        mainPage.classList.remove('hidden');
+        mainPage.classList.remove('fade-out');
+
+        loadingContainer.classList.remove('hidden');
+        resultContent.classList.add('hidden');
+        
+        // Clear previous results
+        photoPreview.style.backgroundImage = 'none';
+        photoUploader.querySelector('.photo-label').style.display = 'block'; 
+        document.querySelector('form').reset();
+    });
+
+
+    // --- Functions ---
+
     function displayResults() {
-        const resultContent = document.getElementById('resultContent');
-        resultContent.innerHTML = ''; // Clear previous results
+        // --- Mock Data ---
+        const user = {
+            name: document.getElementById('name').value || '사용자',
+            physiognomy: '리더십과 카리스마를 상징하는 용상(龍象)',
+            saju: '따뜻한 불(火)의 기운을 가득 품은 인물'
+        };
 
-        const mockResults = [
+        const matches = [
             {
-                name: '김민준',
-                matchRate: '92%',
-                description: '다정하고 유머러스한 성격의 소유자. 당신과 가치관이 매우 잘 맞습니다.',
-                img: `https://i.pravatar.cc/300?u=man1`
+                name: '김지원',
+                photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                physiognomy: '부드럽고 온화한 사슴상',
+                saju: '시원한 물(水)의 기운',
+                compatibility: '당신의 강한 불의 기운을 부드럽게 감싸 안아, 최고의 조화를 이룰 수 있습니다.'
             },
             {
-                name: '이서아',
-                matchRate: '88%',
-                description: '예술적인 감각이 뛰어나고 대화가 잘 통하는 상대입니다. 함께 있으면 즐거울 거예요.',
-                img: `https://i.pravatar.cc/300?u=woman1`
-            },
-            {
-                name: '박지훈',
-                matchRate: '85%',
-                description: '안정적인 성향으로, 당신에게 편안함을 줄 수 있는 좋은 파트너입니다.',
-                img: `https://i.pravatar.cc/300?u=man2`
+                name: '박서연',
+                photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                physiognomy: '지혜롭고 영리한 원숭이상',
+                saju: '단단한 쇠(金)의 기운',
+                compatibility: '당신의 리더십에 지혜를 더하고, 목표를 향해 함께 나아갈 강력한 파트너입니다.'
             }
         ];
 
-        mockResults.forEach(person => {
-            const item = document.createElement('div');
-            item.className = 'result-item';
-            item.innerHTML = `
-                <img src="${person.img}" alt="${person.name}의 사진">
-                <h3>${person.name} (매칭률: ${person.matchRate})</h3>
-                <p>${person.description}</p>
-            `;
+        // --- Render User Profile ---
+        userProfileEl.innerHTML = `<strong>${user.name}님</strong>은 ${user.physiognomy}으로, ${user.saju}입니다. `;
 
-            resultContent.appendChild(item);
+        // --- Render Match List ---
+        matchListEl.innerHTML = ''; // Clear previous list
+        matches.forEach(match => {
+            const card = document.createElement('div');
+            card.className = 'match-card';
+            card.innerHTML = `
+                <img src="${match.photo}" alt="${match.name}" class="match-photo">
+                <div class="match-info">
+                    <h3>${match.name} (${match.physiognomy})</h3>
+                    <p><strong>사주:</strong> ${match.saju}</p>
+                    <p><strong>궁합:</strong> ${match.compatibility}</p>
+                </div>
+            `;
+            matchListEl.appendChild(card);
         });
     }
 });
