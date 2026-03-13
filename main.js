@@ -72,8 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Basic validation
         const name = document.getElementById('name').value;
         const birthdate = document.getElementById('birthdate').value;
-        if (!name || !birthdate || !uploadedFile) {
-            alert('이름, 생년월일을 입력하고 얼굴 사진을 업로드해주세요.');
+        const gender = document.querySelector('input[name="gender"]:checked');
+        
+        if (!name || !birthdate || !uploadedFile || !gender) {
+            alert('이름, 성별, 생년월일을 입력하고 얼굴 사진을 업로드해주세요.');
             return;
         }
 
