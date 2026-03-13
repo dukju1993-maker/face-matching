@@ -62,7 +62,7 @@ The platform will offer users a unique and engaging experience by analyzing thei
 
 ### 4.2. Current Plan & Action Steps
 
-- **Objective:** Implement the frontend of the AI Matchmaking platform based on the user's request. This initial version will simulate the AI analysis and matching features.
+- **Objective:** Implement the frontend of the AI Matchmaking platform based on the user's request. This initial version will simulate the AI analysis and matching features. (Note: Restored the original pink/orange design while maintaining current functionality).
 
 - **Steps:**
   1. **Structure `index.html`:** Create the main HTML file with sections for user input (photo, birth date, etc.) and a hidden section for displaying results.
