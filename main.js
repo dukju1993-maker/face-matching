@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- DOM Elements ---
@@ -26,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 photoPreview.style.backgroundImage = `url(${e.target.result})`;
-                // Clear the default text
                 photoUploader.querySelector('.photo-label').style.display = 'none'; 
             };
             reader.readAsDataURL(file);
@@ -35,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Analyze Button Click
     analyzeBtn.addEventListener('click', () => {
-        // --- Start transition ---
         mainPage.classList.add('fade-out');
         resultPage.classList.remove('hidden');
 
@@ -43,19 +42,17 @@ document.addEventListener('DOMContentLoaded', () => {
             mainPage.classList.add('hidden');
             resultPage.classList.add('fade-in');
 
-            // --- Simulate AI Analysis ---
             setTimeout(() => {
                 loadingContainer.classList.add('hidden');
                 resultContent.classList.remove('hidden');
                 displayResults();
-            }, 2500); // Simulate 2.5 seconds of analysis
+            }, 2500); 
 
-        }, 500); // Match CSS transition duration
+        }, 500);
     });
 
     // 3. Retry Button Click
     retryBtn.addEventListener('click', () => {
-        // Reset UI to initial state
         resultPage.classList.remove('fade-in');
         resultPage.classList.add('hidden');
         mainPage.classList.remove('hidden');
@@ -64,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingContainer.classList.remove('hidden');
         resultContent.classList.add('hidden');
         
-        // Clear previous results
         photoPreview.style.backgroundImage = 'none';
         photoUploader.querySelector('.photo-label').style.display = 'block'; 
         document.querySelector('form').reset();
@@ -73,12 +69,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Functions ---
 
-    function displayResults() {
+    async function displayResults() {
+        // --- Fetch Physiognomy Data ---
+        const response = await fetch('physiognomy-kb.json');
+        const kb = await response.json();
+
+        // --- Get Random Analysis ---
+        const allFeatures = [...kb.faceShapes, ...kb.eyes, ...kb.noses];
+        const randomFeature = allFeatures[Math.floor(Math.random() * allFeatures.length)];
+        const analysis = randomFeature.shape ? 
+            `리더십과 카리스마를 상징하는 ${randomFeature.shape}` :
+            `${randomFeature.feature}으로, ${randomFeature.description}`;
+
+
         // --- Mock Data ---
         const user = {
             name: document.getElementById('name').value || '사용자',
-            physiognomy: '리더십과 카리스마를 상징하는 용상(龍象)',
-            saju: '따뜻한 불(火)의 기운을 가득 품은 인물'
+            physiognomy: analysis,
+            saju: '분석 중...' // Placeholder
         };
 
         const matches = [
@@ -99,10 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
 
         // --- Render User Profile ---
-        userProfileEl.innerHTML = `<strong>${user.name}님</strong>은 ${user.physiognomy}으로, ${user.saju}입니다. `;
+        userProfileEl.innerHTML = `<strong>${user.name}님</strong>은 ${user.physiognomy}이며, 사주 분석 결과는 ${user.saju}입니다. `;
 
         // --- Render Match List ---
-        matchListEl.innerHTML = ''; // Clear previous list
+        matchListEl.innerHTML = ''; 
         matches.forEach(match => {
             const card = document.createElement('div');
             card.className = 'match-card';
