@@ -390,6 +390,74 @@ footer {
     margin-bottom: 0.25rem;
 }
 
+/* Partnership Form Styles */
+#partnership {
+    margin-top: 4rem;
+    padding: 2.5rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+}
+
+#partnership h2 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+#partnership p {
+    text-align: center;
+    color: var(--dark-gray);
+    margin-bottom: 2rem;
+}
+
+#partnershipForm .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#partnershipForm label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+#partnershipForm input[type="email"],
+#partnershipForm textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 2px solid var(--light-gray);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+#partnershipForm input:focus,
+#partnershipForm textarea:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 8px rgba(252, 175, 69, 0.5);
+}
+
+.submit-btn {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+    background: var(--accent-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.submit-btn:hover {
+    background-color: #304bbd;
+    transform: translateY(-2px);
+}
+
 /* Button styles - repurposing existing CTA button style if needed */
 #showResultBtn {
     display: block;

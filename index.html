@@ -52,6 +52,22 @@
             </section>
 
             <button id="showResultBtn">매칭 결과 보기</button>
+
+            <section id="partnership">
+                <h2>제휴 문의</h2>
+                <p>비즈니스 제휴 및 협업 문의는 아래 양식을 통해 남겨주세요.</p>
+                <form action="https://formspree.io/f/myknjrvo" method="POST" id="partnershipForm">
+                    <div class="form-group">
+                        <label for="partner-email">이메일 주소</label>
+                        <input type="email" id="partner-email" name="email" placeholder="example@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="partner-message">문의 내용</label>
+                        <textarea id="partner-message" name="message" rows="4" placeholder="문의하실 내용을 입력해주세요." required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">문의하기</button>
+                </form>
+            </section>
         </div>
 
         <div id="result-page" class="hidden">
