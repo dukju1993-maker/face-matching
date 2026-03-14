@@ -18,6 +18,15 @@
         <div class="header-content">
             <h1>AI 관상/사주 매칭</h1>
             <p class="subtitle">오래된 지혜와 현대 기술이 만나 당신의 인연을 찾습니다.</p>
+            <nav>
+                <ul>
+                    <li><a href="#intro">서비스 소개</a></li>
+                    <li><a href="#user-input-form">분석하기</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#privacy">개인정보처리방침</a></li>
+                    <li><a href="#contact">문의하기</a></li>
+                </ul>
+            </nav>
         </div>
     </header>
 
@@ -25,21 +34,24 @@
         <div id="main-content">
             <section id="intro">
                 <h2>어떻게 인연을 찾을까요?</h2>
+                <div class="intro-description">
+                    <p>전통적인 관상학(Physiognomy)과 명리학(Saju)은 수천 년 동안 사람의 성격과 운명을 이해하는 도구로 사용되어 왔습니다. <strong>AI 관상/사주 매칭</strong>은 이러한 고전적 지혜를 현대의 얼굴 인식 기술 및 데이터 분석 알고리즘과 결합하여, 단순한 재미를 넘어 당신에게 가장 잘 어울리는 인연의 유형을 제안합니다.</p>
+                </div>
                 <div class="steps">
                     <div class="step">
                         <div class="step-icon">👤</div>
                         <h3>1. 정보 입력</h3>
-                        <p>당신의 사진과 사주 정보를 알려주세요.</p>
+                        <p>당신의 사진과 사주 정보를 알려주세요. AI가 특징을 정밀하게 추출합니다.</p>
                     </div>
                     <div class="step">
                         <div class="step-icon">✨</div>
                         <h3>2. AI 분석</h3>
-                        <p>관상학과 명리학에 기반해 AI가 분석을 시작합니다.</p>
+                        <p>얼굴의 비율과 사주의 오행 균형을 분석하여 당신의 본질을 파악합니다.</p>
                     </div>
                     <div class="step">
                         <div class="step-icon">💖</div>
                         <h3>3. 인연 확인</h3>
-                        <p>최고의 궁합을 자랑하는 상대를 확인하세요.</p>
+                        <p>서로의 부족함을 채워주고 장점을 극대화할 수 있는 최고의 궁합을 제안합니다.</p>
                     </div>
                 </div>
             </section>
@@ -81,6 +93,34 @@
                     <button type="button" id="showResultBtn" class="cta-button">최고의 인연 찾기</button>
                 </form>
             </section>
+
+            <section id="about" class="info-section">
+                <h2>About AI-Match</h2>
+                <div class="content-box">
+                    <p>AI-Match는 전통과 기술의 융합을 꿈꾸는 프로젝트입니다. 우리는 관상학과 사주학이라는 동양의 오래된 빅데이터를 현대적인 관점에서 재해석하여, 현대인들에게 흥미롭고 유익한 인연 찾기 경험을 제공하고자 합니다. 우리의 분석 엔진은 단순한 통계를 넘어, 개개인이 가진 고유한 에너지의 흐름을 이해하려고 노력합니다.</p>
+                </div>
+            </section>
+
+            <section id="privacy" class="info-section">
+                <h2>개인정보처리방침</h2>
+                <div class="content-box">
+                    <p>본 서비스는 사용자의 분석 경험을 위해 이름, 사진, 생년월일 정보를 일시적으로 사용합니다.</p>
+                    <ul>
+                        <li><strong>수집 항목:</strong> 이름, 얼굴 사진, 생년월일 및 태어난 시간</li>
+                        <li><strong>수집 목적:</strong> AI 기반 관상 및 사주 분석 결과 제공</li>
+                        <li><strong>보유 및 이용 기간:</strong> 분석 완료 후 즉시 파기하거나 브라우저 메모리 내에서만 유지하며, 서버에 영구적으로 저장하지 않습니다.</li>
+                    </ul>
+                    <p>사용자는 언제든지 서비스 이용을 중단함으로써 자신의 정보 제공을 철회할 수 있습니다.</p>
+                </div>
+            </section>
+
+            <section id="contact" class="info-section">
+                <h2>문의하기</h2>
+                <div class="content-box">
+                    <p>서비스 이용 중 불편한 점이나 제안하고 싶은 사항이 있다면 아래의 이메일로 연락 부탁드립니다.</p>
+                    <p>Email: <a href="mailto:support@ai-match.example.com">support@ai-match.example.com</a></p>
+                </div>
+            </section>
         </div>
 
         <div id="result-page" class="hidden">
@@ -95,8 +135,13 @@
     </main>
 
     <footer>
+        <div class="footer-links">
+            <a href="#about">About</a> | 
+            <a href="#privacy">Privacy Policy</a> | 
+            <a href="#contact">Contact</a>
+        </div>
         <p>&copy; 2024 AI-Match. All Rights Reserved.</p>
-        <p class="disclaimer">본 서비스는 재미를 목적으로 하며, 실제 인물이나 과학적 사실과 무관할 수 있습니다.</p>
+        <p class="disclaimer">본 서비스는 인공지능 분석을 기반으로 한 엔터테인먼트 서비스입니다. 결과는 참고용으로만 사용하시기 바랍니다.</p>
     </footer>
 
     <script src="main.js"></script>

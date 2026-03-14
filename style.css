@@ -44,13 +44,41 @@ body::after {
 
 header {
     text-align: center;
-    padding: 4rem 1rem 2rem;
+    padding: 4rem 1rem 3rem;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
-    border-bottom-left-radius: 50% 20%;
-    border-bottom-right-radius: 50% 20%;
+    border-bottom-left-radius: 50% 10%;
+    border-bottom-right-radius: 50% 10%;
     position: relative;
     overflow: hidden;
+}
+
+nav {
+    margin-top: 2rem;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: 400;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: background 0.3s ease;
+}
+
+nav ul li a:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 header::before {
@@ -90,6 +118,43 @@ main {
     width: 100%;
     position: relative;
     z-index: 10;
+}
+
+.intro-description {
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    line-height: 1.8;
+    color: #555;
+    text-align: center;
+}
+
+.info-section {
+    background: white;
+    padding: 3rem 2rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.info-section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.content-box {
+    line-height: 1.8;
+    color: #444;
+}
+
+.content-box ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.content-box strong {
+    color: var(--primary-color);
 }
 
 #intro, #user-input-form, #result {
@@ -302,6 +367,28 @@ form textarea:focus {
     margin-bottom: 0.5rem;
 }
 
+.analysis-detail {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    font-weight: 400;
+}
+
+.theory-note {
+    font-size: 0.85rem;
+    color: var(--dark-gray);
+    border-top: 1px solid rgba(0,0,0,0.1);
+    padding-top: 0.8rem;
+    font-style: italic;
+}
+
+.match-intro {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 1.5rem;
+    color: #666;
+    line-height: 1.6;
+}
+
 .match-card {
     background: white;
     padding: 1.5rem;
@@ -331,8 +418,23 @@ footer {
     background: var(--text-color);
     color: var(--background-color);
     text-align: center;
-    padding: 2rem 1rem;
+    padding: 3rem 1rem;
     margin-top: 3rem;
+}
+
+.footer-links {
+    margin-bottom: 1.5rem;
+}
+
+.footer-links a {
+    color: #ccc;
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin: 0 0.5rem;
+}
+
+.footer-links a:hover {
+    color: white;
 }
 
 .disclaimer {

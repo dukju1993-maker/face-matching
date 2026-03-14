@@ -140,19 +140,22 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderResults(name, physiognomy, saju, matches) {
         const resultHTML = `
             <div class="user-profile-section">
-                <h2>${name}님의 분석 결과</h2>
+                <h2>${name}님의 상세 분석 보고서</h2>
                 <div class="analysis-card">
-                    <h3>관상 분석</h3>
-                    <p>${physiognomy}</p>
+                    <h3>관상(Physiognomy) 분석</h3>
+                    <p class="analysis-detail">${physiognomy}</p>
+                    <p class="theory-note">관상학은 얼굴의 형상과 색택을 통해 개인의 성품과 운기를 파악하는 학문입니다. AI는 얼굴의 주요 지점(Landmarks)을 분석하여 당신의 고유한 기운을 도출했습니다.</p>
                 </div>
                 <div class="analysis-card">
-                    <h3>사주 분석</h3>
-                    <p>${saju.description}</p>
+                    <h3>사주(Saju) 명리 분석</h3>
+                    <p class="analysis-detail">${saju.description}</p>
+                    <p class="theory-note">명리학은 태어난 시점의 천간(天干)과 지지(地支)의 오행(五行) 분포를 통해 삶의 리듬을 이해합니다. 당신의 생년월일시는 ${saju.element.korean_name}의 성질을 강하게 나타내고 있습니다.</p>
                 </div>
             </div>
 
             <div class="match-section">
-                <h2>최고의 인연</h2>
+                <h2>AI가 추천하는 최고의 인연</h2>
+                <p class="match-intro">관상의 조화와 사주의 상생(相生) 원리를 바탕으로, 당신의 에너지를 가장 잘 보완해주고 함께 성장할 수 있는 파트너를 찾았습니다.</p>
                 ${matches.map(match => `
                     <div class="match-card">
                         <img src="${match.photo}" alt="${match.name}" class="match-photo">
