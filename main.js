@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Gemini API 설정 ---
     // 주의: 실제 서비스에서는 백엔드를 통해 API 키를 숨겨야 하지만, 
     // 현재는 프로토타입 제작을 위해 프론트엔드에서 직접 사용합니다.
-    const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY_HEREAIzaSyBaTVgeCBm12WIYAsHL8wGag3UsBUv_67I'; 
+    const GEMINI_API_KEY = 'AIzaSyBaTVgeCBm12WIYAsHL8wGag3UsBUv_67I'; 
 
     // Photo upload logic
     dropZone.addEventListener('click', () => photoInput.click());
@@ -67,11 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const genderInput = document.querySelector('input[name="gender"]:checked');
         if (!nameInput.value || !birthdateInput.value || !birthtimeInput.value || !photoInput.files[0] || !genderInput) {
             alert('모든 정보를 입력해주세요.');
-            return;
-        }
-
-        if (GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
-            alert('Gemini API 키를 코드에 입력해주세요. (main.js의 GEMINI_API_KEY 변수)');
             return;
         }
 
