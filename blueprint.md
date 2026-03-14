@@ -25,6 +25,13 @@ The platform will offer users a unique and engaging experience by analyzing thei
 - **Results Display:** The app will present a list of recommended matches in a visually appealing card-based layout. Each card will display the matched user's photo, name, and a brief summary of their compatible traits.
 - **Loading Animation:** A loading animation will be displayed while the "analysis" is in progress to enhance the user experience.
 
+### 2.4. Monetization (AdSense)
+
+- **Google AdSense Integration:** The application is integrated with Google AdSense for monetization.
+- **Verification:** A meta tag is added to the `<head>` for account verification.
+- **Ads Delivery:** The AdSense script is included in the `<head>` to enable automated ad placements.
+- **`ads.txt`:** A root-level `ads.txt` file is provided for authorized seller verification.
+
 ## 3. Visual & Interactive Design
 
 ### 3.1. Aesthetics & Branding

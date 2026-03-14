@@ -113,28 +113,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Match Generation Function ---
     function generateMatches(userElement, sajuKB) {
-        const goodMatchElement = sajuKB.relationships.creation_cycle.pairs[userElement.name.split('(')[0]];
+        const goodMatchElementName = sajuKB.relationships.creation_cycle.pairs[userElement.name.split('(')[0]].split(' ')[0];
+        const matchElementInfo = sajuKB.elements.find(el => el.name.startsWith(goodMatchElementName));
         
-        const matchElementInfo = sajuKB.elements.find(el => el.name.startsWith(goodMatchElement.split(' ')[0]));
-
-        // Mock data for matches - in a real app, this would come from a database
         const potentialMatches = [
             { name: '김지우', photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '수(水)' },
             { name: '이서아', photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '목(木)' },
-             { name: '박채원', photo: 'https://images.unsplash.com/photo-1593104547489-5cfb3839a3b5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '화(火)' },
-             { name: '최유나', photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '토(土)' },
-             { name: '정서윤', photo: 'https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '금(金)' }
+            { name: '박채원', photo: 'https://images.unsplash.com/photo-1593104547489-5cfb3839a3b5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '화(火)' },
+            { name: '최유나', photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '토(土)' },
+            { name: '정서윤', photo: 'https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '금(金)' }
         ];
 
-        // Find a match with a compatible element
         const compatibleMatch = potentialMatches.find(p => p.element === matchElementInfo.name);
         
         if(compatibleMatch){
-            compatibleMatch.compatibility = `당신의 ${userElement.korean_name} 기운은 이 분의 ${matchElementInfo.korean_name} 기운을 만나 더욱 강하게 타오를 것입니다. ${sajuKB.relationships.creation_cycle.description}`;
-             return [compatibleMatch];
+            compatibleMatch.compatibility = `당신의 ${userElement.korean_name} 기운은 이 분의 ${matchElementInfo.korean_name} 기운을 만나 더욱 강하게 타오를 것입니다.`;
+            return [compatibleMatch];
         } else {
-            // Return a default match if no direct compatibility is found in mock data
-            const defaultMatch = potentialMatches[0];
+            const defaultMatch = potentialMatches[Math.floor(Math.random() * potentialMatches.length)];
             defaultMatch.compatibility = "서로 다른 매력이 조화를 이루는 관계입니다.";
             return [defaultMatch];
         }
@@ -173,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         resultContentContainer.innerHTML = resultHTML;
 
-        // Add event listener for the new retry button
         document.getElementById('retryBtn').addEventListener('click', () => {
             resultPage.classList.add('hidden');
             mainContent.classList.remove('hidden');
@@ -183,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
             birthtimeInput.value = '';
             photoInput.value = '';
             imagePreview.innerHTML = '';
-             dropZone.querySelector('p').style.display = 'block';
+            dropZone.querySelector('p').style.display = 'block';
         });
     }
 });
