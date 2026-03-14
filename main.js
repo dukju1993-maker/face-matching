@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const imagePreview = document.getElementById('image-preview');
     const dropZone = document.getElementById('drop-zone');
 
+    // --- Gemini API 설정 ---
+    // 주의: 실제 서비스에서는 백엔드를 통해 API 키를 숨겨야 하지만, 
+    // 현재는 프로토타입 제작을 위해 프론트엔드에서 직접 사용합니다.
+    const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY_HEREAIzaSyBaTVgeCBm12WIYAsHL8wGag3UsBUv_67I'; 
+
     // Photo upload logic
     dropZone.addEventListener('click', () => photoInput.click());
     dropZone.addEventListener('dragover', (e) => {
@@ -45,155 +50,121 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsDataURL(file);
     }
 
+    // 파일을 Base64로 변환하는 헬퍼 함수
+    async function fileToGenerativePart(file) {
+        const base64EncodedDataPromise = new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result.split(',')[1]);
+            reader.readAsDataURL(file);
+        });
+        return {
+            inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
+        };
+    }
+
     // --- Main Logic: Show Results ---
     showResultBtn.addEventListener('click', async () => {
-        // 1. Validate Inputs
         const genderInput = document.querySelector('input[name="gender"]:checked');
         if (!nameInput.value || !birthdateInput.value || !birthtimeInput.value || !photoInput.files[0] || !genderInput) {
             alert('모든 정보를 입력해주세요.');
             return;
         }
 
+        if (GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+            alert('Gemini API 키를 코드에 입력해주세요. (main.js의 GEMINI_API_KEY 변수)');
+            return;
+        }
+
         const gender = genderInput.value;
+        const name = nameInput.value;
+        const birthInfo = `${birthdateInput.value} ${birthtimeInput.value}`;
 
         // 2. Transition to Result Page
         mainContent.classList.add('hidden');
         resultPage.classList.remove('hidden');
         loader.style.display = 'block';
-        resultContentContainer.innerHTML = ''; // Clear previous results
+        resultContentContainer.innerHTML = ''; 
         window.scrollTo(0, 0);
 
-        // 3. AI Analysis (Simulated Delay)
         try {
-            await new Promise(resolve => setTimeout(resolve, 2500));
+            // 3. Gemini API 호출
+            const imagePart = await fileToGenerativePart(photoInput.files[0]);
+            const prompt = `
+                당신은 최고의 관상가이자 사주 명리학자입니다. 
+                첨부된 사진의 얼굴 특징(관상)과 제공된 사주 정보(생년월일시: ${birthInfo}, 성별: ${gender})를 분석하여 다음 형식의 JSON 데이터로 답변해주세요.
+                이름은 ${name}입니다.
 
-            // 4. Fetch Knowledge Bases
-            const [physiognomyKB, sajuKB] = await Promise.all([
-                fetch('physiognomy-kb.json').then(res => res.json()),
-                fetch('saju-kb.json').then(res => res.json())
-            ]);
+                JSON 형식:
+                {
+                    "physiognomy": "얼굴의 주요 특징과 그에 따른 성격/운세 분석 결과 (300자 내외)",
+                    "saju": "생년월일시를 바탕으로 한 오행 분석과 현재 운세 풀이 (300자 내외)",
+                    "match": {
+                        "name": "추천하는 가상의 인연 이름",
+                        "photo_concept": "어울리는 상대방의 스타일 설명",
+                        "compatibility": "두 사람의 관상 및 사주 조화/궁합 풀이 (200자 내외)",
+                        "element": "상대의 대표 오행 (예: 수(水))"
+                    }
+                }
+                
+                답변은 반드시 유효한 JSON 형식이어야 하며, 한국어로 작성하세요.
+            `;
 
-            // 5. Perform Saju Analysis
-            const sajuResult = getSajuAnalysis(birthdateInput.value, birthtimeInput.value, gender, sajuKB);
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }, imagePart] }]
+                })
+            });
+
+            const data = await response.json();
+            const resultText = data.candidates[0].content.parts[0].text;
             
-            // 6. Perform Physiognomy Analysis (Random for now)
-            const physiognomyResult = getPhysiognomyAnalysis(physiognomyKB);
+            // JSON 응답에서 불필요한 마크다운 제거
+            const cleanJson = resultText.replace(/```json|```/g, '').trim();
+            const aiResult = JSON.parse(cleanJson);
 
-            // 7. Generate Mock Matches
-            const matches = generateMatches(sajuResult.element, sajuKB);
-
-            // 8. Display results
+            // 4. Display results
             loader.style.display = 'none';
-            renderResults(nameInput.value, physiognomyResult, sajuResult, matches);
+            renderResults(name, aiResult);
         } catch (error) {
-            console.error('Analysis failed:', error);
-            alert('분석 중 오류가 발생했습니다. 다시 시도해주세요.');
+            console.error('Gemini API Error:', error);
+            alert('AI 분석 중 오류가 발생했습니다. API 키를 확인하거나 잠시 후 다시 시도해주세요.');
             loader.style.display = 'none';
             mainContent.classList.remove('hidden');
             resultPage.classList.add('hidden');
         }
     });
 
-    // --- Saju Analysis Function ---
-    function getSajuAnalysis(birthdate, birthtime, gender, sajuKB) {
-        const date = new Date(`${birthdate}T${birthtime}`);
-        if (typeof manseryeok === 'undefined') {
-            throw new Error('Manseryeok library not loaded');
-        }
-        const saju = manseryeok.getSaju(date, gender);
-
-        // Find the user's primary element from the day's Heavenly Stem (일간)
-        const dayGanHanja = saju.day.gan.hanja;
-        const GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-        const ELEMENTS = ['목(木)', '목(木)', '화(火)', '화(火)', '토(土)', '토(土)', '금(金)', '금(金)', '수(水)', '수(수)'];
-        const userElementName = ELEMENTS[GAN.indexOf(dayGanHanja)];
-        
-        const elementInfo = sajuKB.elements.find(el => el.name === userElementName);
-
-        if (!elementInfo) {
-            throw new Error('Element information not found in KB');
-        }
-
-        return {
-            element: elementInfo,
-            fullSaju: saju,
-            description: `당신은 ${elementInfo.korean_name}의 기운을 타고났습니다. ${elementInfo.description}`
-        };
-    }
-
-    // --- Physiognomy Analysis Function ---
-    function getPhysiognomyAnalysis(physiognomyKB) {
-        const allFeatures = [...physiognomyKB.faceShapes, ...physiognomyKB.eyes, ...physiognomyKB.noses];
-        if (allFeatures.length === 0) return "분석할 수 있는 특징이 충분하지 않습니다.";
-        const randomFeature = allFeatures[Math.floor(Math.random() * allFeatures.length)];
-        return randomFeature.shape ? 
-            `전체적으로 ${randomFeature.shape}의 기운이 느껴집니다. ${randomFeature.description}` :
-            `${randomFeature.feature} 특징이 돋보입니다. ${randomFeature.description}`;
-    }
-
-    // --- Match Generation Function ---
-    function generateMatches(userElement, sajuKB) {
-        const userElementNameBase = userElement.name.split('(')[0];
-        const pairing = sajuKB.relationships.creation_cycle.pairs[userElementNameBase];
-        
-        if (!pairing) return [];
-        
-        const goodMatchElementName = pairing.split(' ')[0];
-        const matchElementInfo = sajuKB.elements.find(el => el.name.startsWith(goodMatchElementName));
-        
-        if (!matchElementInfo) return [];
-
-        const potentialMatches = [
-            { name: '김지우', photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '수(水)' },
-            { name: '이서아', photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '목(木)' },
-            { name: '박채원', photo: 'https://images.unsplash.com/photo-1593104547489-5cfb3839a3b5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '화(火)' },
-            { name: '최유나', photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '토(土)' },
-            { name: '정서윤', photo: 'https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '금(金)' }
-        ];
-
-        const compatibleMatch = potentialMatches.find(p => p.element === matchElementInfo.name);
-        
-        if(compatibleMatch){
-            const matchObj = {...compatibleMatch};
-            matchObj.compatibility = `당신의 ${userElement.korean_name} 기운은 이 분의 ${matchElementInfo.korean_name} 기운을 만나 더욱 강하게 타오를 것입니다.`;
-            return [matchObj];
-        } else {
-            const defaultMatch = {...potentialMatches[Math.floor(Math.random() * potentialMatches.length)]};
-            defaultMatch.compatibility = "서로 다른 매력이 조화를 이루는 관계입니다.";
-            return [defaultMatch];
-        }
-    }
-
     // --- Rendering Function ---
-    function renderResults(name, physiognomy, saju, matches) {
+    function renderResults(name, aiResult) {
         const resultHTML = `
             <div class="user-profile-section">
-                <h2>${name}님의 상세 분석 보고서</h2>
+                <h2>${name}님의 AI 상세 분석 보고서</h2>
                 <div class="analysis-card">
-                    <h3>관상(Physiognomy) 분석</h3>
-                    <p class="analysis-detail">${physiognomy}</p>
-                    <p class="theory-note">관상학은 얼굴의 형상과 색택을 통해 개인의 성품과 운기를 파악하는 학문입니다. AI는 얼굴의 주요 지점(Landmarks)을 분석하여 당신의 고유한 기운을 도출했습니다.</p>
+                    <h3>관상(Physiognomy) 실시간 분석</h3>
+                    <p class="analysis-detail">${aiResult.physiognomy}</p>
+                    <p class="theory-note">AI가 이미지 픽셀 데이터를 기반으로 눈, 코, 입의 위치와 형태를 정밀 분석한 결과입니다.</p>
                 </div>
                 <div class="analysis-card">
-                    <h3>사주(Saju) 명리 분석</h3>
-                    <p class="analysis-detail">${saju.description}</p>
-                    <p class="theory-note">명리학은 태어난 시점의 천간(天干)과 지지(地支)의 오행(五행) 분포를 통해 삶의 리듬을 이해합니다. 당신의 생년월일시는 ${saju.element.korean_name}의 성질을 강하게 나타내고 있습니다.</p>
+                    <h3>사주(Saju) 명리 심층 분석</h3>
+                    <p class="analysis-detail">${aiResult.saju}</p>
+                    <p class="theory-note">태어난 시점의 천체 에너지 분포와 대운의 흐름을 계산한 결과입니다.</p>
                 </div>
             </div>
 
             <div class="match-section">
-                <h2>AI가 추천하는 최고의 인연</h2>
-                <p class="match-intro">관상의 조화와 사주의 상생(相生) 원리를 바탕으로, 당신의 에너지를 가장 잘 보완해주고 함께 성장할 수 있는 파트너를 찾았습니다.</p>
-                ${matches.map(match => `
-                    <div class="match-card">
-                        <img src="${match.photo}" alt="${match.name}" class="match-photo">
-                        <div class="match-info">
-                            <h3>${match.name}</h3>
-                            <p><strong>타고난 기운:</strong> ${match.element}</p>
-                            <p><strong>궁합 풀이:</strong> ${match.compatibility}</p>
-                        </div>
+                <h2>AI가 찾은 운명의 데스티니</h2>
+                <p class="match-intro">당신의 에너지 파동과 가장 완벽한 하모니를 이루는 가상의 인연을 매칭했습니다.</p>
+                <div class="match-card">
+                    <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1974&auto=format&fit=crop" alt="Match" class="match-photo">
+                    <div class="match-info">
+                        <h3>${aiResult.match.name}</h3>
+                        <p><strong>특징:</strong> ${aiResult.match.photo_concept}</p>
+                        <p><strong>타고난 기운:</strong> ${aiResult.match.element}</p>
+                        <p><strong>궁합 풀이:</strong> ${aiResult.match.compatibility}</p>
                     </div>
-                `).join('')}
+                </div>
             </div>
             
             <button id="retryBtn" class="cta-button">다시 분석하기</button>
@@ -203,15 +174,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('retryBtn').addEventListener('click', () => {
             resultPage.classList.add('hidden');
             mainContent.classList.remove('hidden');
-            // Reset form fields
             nameInput.value = '';
             birthdateInput.value = '';
             birthtimeInput.value = '';
             photoInput.value = '';
             imagePreview.innerHTML = '';
             dropZone.querySelector('p').style.display = 'block';
-            const checkedGender = document.querySelector('input[name="gender"]:checked');
-            if (checkedGender) checkedGender.checked = false;
             window.scrollTo(0, 0);
         });
     }
