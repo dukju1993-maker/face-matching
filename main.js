@@ -48,56 +48,75 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Main Logic: Show Results ---
     showResultBtn.addEventListener('click', async () => {
         // 1. Validate Inputs
-        if (!nameInput.value || !birthdateInput.value || !birthtimeInput.value || !photoInput.files[0]) {
+        const genderInput = document.querySelector('input[name="gender"]:checked');
+        if (!nameInput.value || !birthdateInput.value || !birthtimeInput.value || !photoInput.files[0] || !genderInput) {
             alert('모든 정보를 입력해주세요.');
             return;
         }
+
+        const gender = genderInput.value;
 
         // 2. Transition to Result Page
         mainContent.classList.add('hidden');
         resultPage.classList.remove('hidden');
         loader.style.display = 'block';
         resultContentContainer.innerHTML = ''; // Clear previous results
+        window.scrollTo(0, 0);
 
         // 3. AI Analysis (Simulated Delay)
-        await new Promise(resolve => setTimeout(resolve, 2500));
+        try {
+            await new Promise(resolve => setTimeout(resolve, 2500));
 
-        // 4. Fetch Knowledge Bases
-        const [physiognomyKB, sajuKB] = await Promise.all([
-            fetch('physiognomy-kb.json').then(res => res.json()),
-            fetch('saju-kb.json').then(res => res.json())
-        ]);
+            // 4. Fetch Knowledge Bases
+            const [physiognomyKB, sajuKB] = await Promise.all([
+                fetch('physiognomy-kb.json').then(res => res.json()),
+                fetch('saju-kb.json').then(res => res.json())
+            ]);
 
-        // 5. Perform Saju Analysis
-        const sajuResult = getSajuAnalysis(birthdateInput.value, birthtimeInput.value, sajuKB);
-        
-        // 6. Perform Physiognomy Analysis (Random for now)
-        const physiognomyResult = getPhysiognomyAnalysis(physiognomyKB);
+            // 5. Perform Saju Analysis
+            const sajuResult = getSajuAnalysis(birthdateInput.value, birthtimeInput.value, gender, sajuKB);
+            
+            // 6. Perform Physiognomy Analysis (Random for now)
+            const physiognomyResult = getPhysiognomyAnalysis(physiognomyKB);
 
-        // 7. Generate Mock Matches
-        const matches = generateMatches(sajuResult.element, sajuKB);
+            // 7. Generate Mock Matches
+            const matches = generateMatches(sajuResult.element, sajuKB);
 
-        // 8. Display results
-        loader.style.display = 'none';
-        renderResults(nameInput.value, physiognomyResult, sajuResult, matches);
+            // 8. Display results
+            loader.style.display = 'none';
+            renderResults(nameInput.value, physiognomyResult, sajuResult, matches);
+        } catch (error) {
+            console.error('Analysis failed:', error);
+            alert('분석 중 오류가 발생했습니다. 다시 시도해주세요.');
+            loader.style.display = 'none';
+            mainContent.classList.remove('hidden');
+            resultPage.classList.add('hidden');
+        }
     });
 
     // --- Saju Analysis Function ---
-    function getSajuAnalysis(birthdate, birthtime, sajuKB) {
+    function getSajuAnalysis(birthdate, birthtime, gender, sajuKB) {
         const date = new Date(`${birthdate}T${birthtime}`);
-        const saju = manseryeok.getSaju(date, "male"); // Gender can be dynamic
+        if (typeof manseryeok === 'undefined') {
+            throw new Error('Manseryeok library not loaded');
+        }
+        const saju = manseryeok.getSaju(date, gender);
 
         // Find the user's primary element from the day's Heavenly Stem (일간)
         const dayGanHanja = saju.day.gan.hanja;
         const GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-        const ELEMENTS = ['목(木)', '목(木)', '화(火)', '화(火)', '토(土)', '토(土)', '금(金)', '금(金)', '수(水)', '수(水)'];
-        const userElement = ELEMENTS[GAN.indexOf(dayGanHanja)];
+        const ELEMENTS = ['목(木)', '목(木)', '화(火)', '화(火)', '토(土)', '토(土)', '금(金)', '금(金)', '수(水)', '수(수)'];
+        const userElementName = ELEMENTS[GAN.indexOf(dayGanHanja)];
         
-        const elementInfo = sajuKB.elements.find(el => el.name === userElement);
+        const elementInfo = sajuKB.elements.find(el => el.name === userElementName);
+
+        if (!elementInfo) {
+            throw new Error('Element information not found in KB');
+        }
 
         return {
             element: elementInfo,
-            fullSaju: saju, // For potential future use
+            fullSaju: saju,
             description: `당신은 ${elementInfo.korean_name}의 기운을 타고났습니다. ${elementInfo.description}`
         };
     }
@@ -105,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Physiognomy Analysis Function ---
     function getPhysiognomyAnalysis(physiognomyKB) {
         const allFeatures = [...physiognomyKB.faceShapes, ...physiognomyKB.eyes, ...physiognomyKB.noses];
+        if (allFeatures.length === 0) return "분석할 수 있는 특징이 충분하지 않습니다.";
         const randomFeature = allFeatures[Math.floor(Math.random() * allFeatures.length)];
         return randomFeature.shape ? 
             `전체적으로 ${randomFeature.shape}의 기운이 느껴집니다. ${randomFeature.description}` :
@@ -113,9 +133,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Match Generation Function ---
     function generateMatches(userElement, sajuKB) {
-        const goodMatchElementName = sajuKB.relationships.creation_cycle.pairs[userElement.name.split('(')[0]].split(' ')[0];
+        const userElementNameBase = userElement.name.split('(')[0];
+        const pairing = sajuKB.relationships.creation_cycle.pairs[userElementNameBase];
+        
+        if (!pairing) return [];
+        
+        const goodMatchElementName = pairing.split(' ')[0];
         const matchElementInfo = sajuKB.elements.find(el => el.name.startsWith(goodMatchElementName));
         
+        if (!matchElementInfo) return [];
+
         const potentialMatches = [
             { name: '김지우', photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '수(水)' },
             { name: '이서아', photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', element: '목(木)' },
@@ -127,10 +154,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const compatibleMatch = potentialMatches.find(p => p.element === matchElementInfo.name);
         
         if(compatibleMatch){
-            compatibleMatch.compatibility = `당신의 ${userElement.korean_name} 기운은 이 분의 ${matchElementInfo.korean_name} 기운을 만나 더욱 강하게 타오를 것입니다.`;
-            return [compatibleMatch];
+            const matchObj = {...compatibleMatch};
+            matchObj.compatibility = `당신의 ${userElement.korean_name} 기운은 이 분의 ${matchElementInfo.korean_name} 기운을 만나 더욱 강하게 타오를 것입니다.`;
+            return [matchObj];
         } else {
-            const defaultMatch = potentialMatches[Math.floor(Math.random() * potentialMatches.length)];
+            const defaultMatch = {...potentialMatches[Math.floor(Math.random() * potentialMatches.length)]};
             defaultMatch.compatibility = "서로 다른 매력이 조화를 이루는 관계입니다.";
             return [defaultMatch];
         }
@@ -149,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="analysis-card">
                     <h3>사주(Saju) 명리 분석</h3>
                     <p class="analysis-detail">${saju.description}</p>
-                    <p class="theory-note">명리학은 태어난 시점의 천간(天干)과 지지(地支)의 오행(五行) 분포를 통해 삶의 리듬을 이해합니다. 당신의 생년월일시는 ${saju.element.korean_name}의 성질을 강하게 나타내고 있습니다.</p>
+                    <p class="theory-note">명리학은 태어난 시점의 천간(天干)과 지지(地支)의 오행(五행) 분포를 통해 삶의 리듬을 이해합니다. 당신의 생년월일시는 ${saju.element.korean_name}의 성질을 강하게 나타내고 있습니다.</p>
                 </div>
             </div>
 
@@ -182,6 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
             photoInput.value = '';
             imagePreview.innerHTML = '';
             dropZone.querySelector('p').style.display = 'block';
+            const checkedGender = document.querySelector('input[name="gender"]:checked');
+            if (checkedGender) checkedGender.checked = false;
+            window.scrollTo(0, 0);
         });
     }
 });
